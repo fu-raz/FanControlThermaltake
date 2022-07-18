@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="HidSharp" Version="2.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="FanControl.Plugins">
+      <HintPath>..\FanControl.Plugins.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
