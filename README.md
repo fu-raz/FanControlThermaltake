@@ -4,7 +4,7 @@ This is a plugin that let's [Fan Control](https://github.com/Rem0o/FanControl.Re
 ![tt-controller](https://user-images.githubusercontent.com/5355154/179553404-eb8102e8-6ced-4eee-aae5-79912550e278.png)
 
 *Known Issues:*
-- It doesn't work when TTRGB is running. You can't run TTRGB and FanControl with this plugin at the same time. Maybe if you set the fans to 0% in TTRGB. Which means you don't get to change the RGB of the fans.
+- Running this plugin and TT RGB Plus at the same time is a problem. You could try to set the fans in TT RGB Plus to manual and 0%.
 - Setting the fan power is instant, but the read out takes a few seconds to adjust. So it takes a while before the Fan Control app sees the right RPM and Power values.
 
 *Possible Issues:*
