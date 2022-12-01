@@ -7,7 +7,7 @@ namespace FanControl.ThermaltakeRiingPlus
     {
         public HidSharp.HidStream HidDevice;
         public int Index;
-        public string Name => "Thermaltake Riing";
+        public string Name => "Thermaltake Controller";
         public int PortCount = 5;
 
         protected List<ControlSensor> controlSensors = new List<ControlSensor>();
@@ -25,7 +25,7 @@ namespace FanControl.ThermaltakeRiingPlus
         protected void DetectFans()
         {
             // Connect to each port and check if we can get an RPM
-            for (int portNumber = 1; portNumber < this.PortCount; portNumber++)
+            for (int portNumber = 1; portNumber <= this.PortCount; portNumber++)
             {
                 Log.WriteToLog($"Trying to detect Fan on port {portNumber}");
                 int RPM = this.GetFanRPM(portNumber);
