@@ -6,7 +6,7 @@ namespace FanControl.ThermaltakeRiingPlus
     public class Plugin : IPlugin2
     {
         private DevicesController DevicesController = new DevicesController();
-        public string Name => "Thermaltake Riing Plus";
+        public string Name => "Thermaltake";
 
         public void Close()
         {

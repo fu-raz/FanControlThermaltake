@@ -22,12 +22,12 @@ namespace FanControl.ThermaltakeRiingPlus
                     if (hidDevice.VendorID == this.VendorId)
                     {
                         Log.WriteToLog($"Found Thermaltake device with Vendor ID {hidDevice.VendorID} and Product ID {hidDevice.ProductID}");
-                        
+
                         if (hidDevice.ProductID >= this.ProductId &&
                         hidDevice.ProductID <= this.ProductId + this.MaxConnectedDevices)
                         {
                             Log.WriteToLog("We found a TT device");
-                            
+
                             if (hidDevice.TryOpen(out HidSharp.HidStream hidStream))
                             {
                                 Log.WriteToLog("We opened the HID Device");
@@ -39,6 +39,10 @@ namespace FanControl.ThermaltakeRiingPlus
                                 Log.WriteToLog($"We have {this.Devices.Count} devices");
                             }
 
+                        }
+                        else
+                        {
+                            Log.WriteToLog("We found a TT device, but it isn't supported yet. Please post an issue here (https://github.com/fu-raz/FanControlThermaltake/issues/) with this log");
                         }
                     }
 
