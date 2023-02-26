@@ -9,9 +9,9 @@ namespace FanControl.ThermaltakeRiingPlus
         public float? Value { get; set; }
 
         protected int portNumber;
-        protected TTFanController ttFanController;
+        protected TTFanControllerInterface ttFanController;
 
-        public ControlSensor(string id, string name, int portNumber, TTFanController ttFanController)
+        public ControlSensor(string id, string name, int portNumber, TTFanControllerInterface ttFanController)
         {
             this.Id = id;
             this.Name = name;

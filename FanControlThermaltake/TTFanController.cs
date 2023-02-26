@@ -7,8 +7,15 @@ namespace FanControl.ThermaltakeRiingPlus
     {
         public HidSharp.HidStream HidDevice;
         public int Index;
-        public string Name => "Thermaltake Controller";
+        public string Name => "Default Controller";
         public int PortCount = 5;
+
+        public static byte ProductIdStart => 0;
+        public static byte ProductIdEnd => 5;
+
+        protected byte byteGet = 0x33;
+        protected byte byteGetSpeed = 0x51;
+        protected byte byteSet = 0x32;
 
         protected List<ControlSensor> controlSensors = new List<ControlSensor>();
         protected List<FanSensor> fanSensors = new List<FanSensor>();
@@ -47,7 +54,7 @@ namespace FanControl.ThermaltakeRiingPlus
 
         protected string GetFanId(int portNumber)
         {
-            return $"TTRiing.{this.Index}.{portNumber}";
+            return $"TT.{this.Index}.{portNumber}";
         }
 
         protected string GetFanName(int portNumber)
@@ -58,7 +65,7 @@ namespace FanControl.ThermaltakeRiingPlus
         public int GetFanRPM(int portNumber)
         {
             // Send 'get port info' request
-            this.HidDevice.Write(new byte[] { 0x00, 0x33, 0x51, (byte)portNumber });
+            this.HidDevice.Write(new byte[] { 0x00, this.byteGet, this.byteGetSpeed, (byte)portNumber });
             // Read the output
             byte[] portData = new byte[10];
             this.HidDevice.Read(portData);
@@ -71,7 +78,7 @@ namespace FanControl.ThermaltakeRiingPlus
         public int GetFanPower(int portNumber)
         {
             // Send 'get port info' request
-            this.HidDevice.Write(new byte[] { 0x00, 0x33, 0x51, (byte)portNumber });
+            this.HidDevice.Write(new byte[] { 0x00, this.byteGet, this.byteGetSpeed, (byte)portNumber });
             // Read the output
             byte[] portData = new byte[10];
             this.HidDevice.Read(portData);
@@ -84,7 +91,7 @@ namespace FanControl.ThermaltakeRiingPlus
         public void SetFanPower(int portNumber, float value)
         {
             int percentage = (int)Math.Round(value);
-            this.HidDevice.Write(new byte[] { 0, 0x32, 0x51, (byte)portNumber, 0x01, (byte)percentage });
+            this.HidDevice.Write(new byte[] { 0, this.byteSet, this.byteGetSpeed, (byte)portNumber, 0x01, (byte)percentage });
         }
 
         public List<ControlSensor> GetControlSensors()

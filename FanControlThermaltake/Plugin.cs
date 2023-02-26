@@ -26,9 +26,9 @@ namespace FanControl.ThermaltakeRiingPlus
             List<ControlSensor> controlSensors = new List<ControlSensor>();
             List<FanSensor> fanSensors = new List<FanSensor>();
 
-            List<TTFanController> fanControllers = this.DevicesController.GetFanControllers();
+            List<TTFanControllerInterface> fanControllers = this.DevicesController.GetFanControllers();
             
-            foreach (TTFanController fanController in fanControllers)
+            foreach (TTFanControllerInterface fanController in fanControllers)
             {
                 List<ControlSensor> cs = fanController.GetControlSensors();
                 foreach (ControlSensor sensor in cs)
