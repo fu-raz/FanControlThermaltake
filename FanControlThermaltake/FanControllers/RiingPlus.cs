@@ -12,8 +12,8 @@ namespace FanControl.ThermaltakeRiingPlus.FanControllers
         public new string Name => "Riing Plus";
         public new int PortCount = 5;
 
-        public new int ProductIdStart => 0x1f41;
-        public new int ProductIdEnd => 0x1f51;
+        public new int ProductIdStart => 0x1fa5;
+        public new int ProductIdEnd => 0x1fb5;
 
     }
 }

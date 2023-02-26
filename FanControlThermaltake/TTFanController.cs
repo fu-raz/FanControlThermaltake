@@ -13,9 +13,10 @@ namespace FanControl.ThermaltakeRiingPlus
         public int ProductIdStart => 0;
         public int ProductIdEnd => 5;
 
-        protected byte byteGet = 0x33;
-        protected byte byteGetSpeed = 0x51;
-        protected byte byteSet = 0x32;
+        public byte byteGet => 0x33;
+        public byte byteGetSpeed => 0x51;
+        public byte byteSet => 0x32;
+        public byte byteSetSpeed => 0x01;
 
         protected List<ControlSensor> controlSensors = new List<ControlSensor>();
         protected List<FanSensor> fanSensors = new List<FanSensor>();
@@ -107,7 +108,7 @@ namespace FanControl.ThermaltakeRiingPlus
         public void SetFanPower(int portNumber, float value)
         {
             int percentage = (int)Math.Round(value);
-            this.HidDevice.Write(new byte[] { 0, this.byteSet, this.byteGetSpeed, (byte)portNumber, 0x01, (byte)percentage });
+            this.HidDevice.Write(new byte[] { 0, this.byteSet, this.byteGetSpeed, (byte)portNumber, this.byteSetSpeed, (byte)percentage });
         }
 
         public List<ControlSensor> GetControlSensors()
