@@ -8,14 +8,15 @@ namespace FanControl.ThermaltakeRiingPlus
 {
     public interface TTFanControllerInterface
     {
-        public string Name;
-        public int PortCount;
-        public static byte ProductIdStart;
-        public static byte ProductIdEnd;
-        public int GetFanRPM(int portNumber);
-        public int GetFanPower(int portNumber);
-        public void SetFanPower(int portNumber, float value);
-        public List<ControlSensor> GetControlSensors();
-        public List<FanSensor> GetFanSensors();
+        string Name { get; }
+        int PortCount { get; }
+        int ProductIdStart { get; }
+        int ProductIdEnd { get; }
+        void init(HidSharp.HidStream hidDevice, int index);
+        int GetFanRPM(int portNumber);
+        int GetFanPower(int portNumber);
+        void SetFanPower(int portNumber, float value);
+        List<ControlSensor> GetControlSensors();
+        List<FanSensor> GetFanSensors();
     }
 }

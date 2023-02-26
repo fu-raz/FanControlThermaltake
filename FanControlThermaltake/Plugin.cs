@@ -15,6 +15,7 @@ namespace FanControl.ThermaltakeRiingPlus
 
         public void Initialize()
         {
+            Log.WriteToLog("----------------------------");
             Log.WriteToLog("Initializing Plugin");
             this.DevicesController.Connect();
         }

@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace FanControl.ThermaltakeRiingPlus.FanControllers
 {
-    public class RiingPlus : TTFanController, TTFanControllerInterface
+    public class RiingQuad : TTFanController, TTFanControllerInterface
     {
-        public new string Name => "Riing Plus";
+        public new string Name => "Riing Quad";
         public new int PortCount = 5;
 
-        public new int ProductIdStart => 0x1f41;
-        public new int ProductIdEnd => 0x1f51;
+        public new int ProductIdStart => 0x2260;
+        public new int ProductIdEnd => 0x2270;
 
     }
 }

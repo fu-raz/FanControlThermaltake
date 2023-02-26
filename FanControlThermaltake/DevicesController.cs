@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace FanControl.ThermaltakeRiingPlus
 {
@@ -23,8 +25,8 @@ namespace FanControl.ThermaltakeRiingPlus
                     if (hidDevice.VendorID == this.VendorId)
                     {
                         Log.WriteToLog($"Found Thermaltake device with Vendor ID {hidDevice.VendorID} and Product ID {hidDevice.ProductID}");
-                        var fanControllerMatch = this.findController(hidDevice.ProductID);
-                        if (fanControllerMatch)
+                        TTFanControllerInterface fanControllerMatch = this.findController(hidDevice.ProductID);
+                        if (null != fanControllerMatch)
                         {
                             
                             Log.WriteToLog("We found a TT device");
@@ -33,10 +35,19 @@ namespace FanControl.ThermaltakeRiingPlus
                             {
                                 Log.WriteToLog("We opened the HID Device");
                                 int controllerIndex = this.Devices.Count;
-                                TTFanControllerInterface ttFanController = Activator.CreateInstance(fanControllerMatch, hidStream, controllerIndex) as TTFanControllerInterface;
+
+                                if (hidStream.CanWrite)
+                                {
+                                    Log.WriteToLog("HID device is writeable");
+                                } else
+                                {
+                                    Log.WriteToLog("HID device is not writable");
+                                }
+
+                                fanControllerMatch.init(hidStream, controllerIndex);
 
                                 Log.WriteToLog("Adding HID Device to Devices");
-                                this.Devices.Add(ttFanController);
+                                this.Devices.Add(fanControllerMatch);
                                 Log.WriteToLog($"We have {this.Devices.Count} devices");
                             }
                         }
@@ -51,40 +62,36 @@ namespace FanControl.ThermaltakeRiingPlus
 
         }
 
-        private findController(int hidDeviceProductId)
+        private TTFanControllerInterface findController(int hidDeviceProductId)
         {
             string targetNamespace = "FanControl.ThermaltakeRiingPlus.FanControllers";
             // Get all types in the current assembly
             var matchingTypes = Assembly.GetExecutingAssembly()
                                     .GetTypes()
-                                    .Where(t => t.Namespace == targetNamespace &&
-                                                t.GetProperties(BindingFlags.Static | BindingFlags.Public)
-                                                .Any(p => p.Name == "ProductIdStart" || p.Name == "ProductIdEnd")
-                                                );
+                                    .Where(t => t.Namespace == targetNamespace);
 
             foreach (var match in matchingTypes)
             {
-                PropertyInfo productIdStart = match.GetProperty("ProductIdStart", BindingFlags.Static | BindingFlags.Public);
-                PropertyInfo productIdEnd = match.GetProperty("ProductIdEnd", BindingFlags.Static | BindingFlags.Public);
-                if (productIdStart != null && productIdEnd != null)
+                Log.WriteToLog("Found a FanController class");
+                TTFanControllerInterface ttFanController = Activator.CreateInstance(match) as TTFanControllerInterface;
+                Log.WriteToLog($"Testing supported controller {ttFanController.Name}");
+                if (hidDeviceProductId >= ttFanController.ProductIdStart && hidDeviceProductId <= ttFanController.ProductIdEnd)
                 {
-                    int start = (int)productIdStart.GetValue(null);
-                    int end = (int)productIdEnd.GetValue(null);
-                    if (hidDeviceProductId >= start && hidDeviceProductId <= end)
-                    {
-                        return match;
-                    }
+                    return ttFanController;
+                } else
+                {
+                    Log.WriteToLog($"No match: {ttFanController.Name} has product ids ranging from {ttFanController.ProductIdStart} to {ttFanController.ProductIdEnd}");
                 }
             }
 
-            return false;
+            return null;
         }
         public void Disconnect()
         {
             // I dunno what to do
         }
 
-        public List<TTFanController> GetFanControllers()
+        public List<TTFanControllerInterface> GetFanControllers()
         {
             return this.Devices;
         }
