@@ -29,7 +29,7 @@ namespace FanControl.ThermaltakeRiingPlus
                         if (null != fanControllerMatch)
                         {
                             
-                            Log.WriteToLog("We found a TT device");
+                            Log.WriteToLog($"We found a TT device: {fanControllerMatch.GetName()}");
 
                             if (hidDevice.TryOpen(out HidSharp.HidStream hidStream))
                             {
@@ -72,7 +72,7 @@ namespace FanControl.ThermaltakeRiingPlus
 
             foreach (var match in matchingTypes)
             {
-                Log.WriteToLog("Found a FanController class");
+                Log.WriteToLog($"Found a FanController class: {match.Name}");
                 TTFanControllerInterface ttFanController = Activator.CreateInstance(match) as TTFanControllerInterface;
                 Log.WriteToLog($"Testing supported controller {ttFanController.Name}");
                 if (hidDeviceProductId >= ttFanController.ProductIdStart && hidDeviceProductId <= ttFanController.ProductIdEnd)

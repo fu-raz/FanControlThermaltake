@@ -17,8 +17,11 @@ namespace FanControl.ThermaltakeRiingPlus
         byte byteGetSpeed { get; }
         byte byteSet { get; }
         byte byteSetSpeed { get; }
+        byte byteInit { get; }
 
         void init(HidSharp.HidStream hidDevice, int index);
+
+        string GetName();
         int GetFanRPM(int portNumber);
         int GetFanPower(int portNumber);
         void SetFanPower(int portNumber, float value);

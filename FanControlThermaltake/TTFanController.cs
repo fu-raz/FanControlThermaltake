@@ -7,16 +7,17 @@ namespace FanControl.ThermaltakeRiingPlus
     {
         public HidSharp.HidStream HidDevice;
         public int Index;
-        public string Name => "Default Controller";
-        public int PortCount => 5;
+        public virtual string Name => "Default Controller";
+        public virtual int PortCount => 5;
 
-        public int ProductIdStart => 0;
-        public int ProductIdEnd => 5;
+        public virtual int ProductIdStart => 0;
+        public virtual int ProductIdEnd => 5;
 
-        public byte byteGet => 0x33;
-        public byte byteGetSpeed => 0x51;
-        public byte byteSet => 0x32;
-        public byte byteSetSpeed => 0x01;
+        public virtual byte byteGet => 0x33;
+        public virtual byte byteGetSpeed => 0x51;
+        public virtual byte byteSet => 0x32;
+        public virtual byte byteSetSpeed => 0x01;
+        public virtual byte byteInit => 0xfe;
 
         protected List<ControlSensor> controlSensors = new List<ControlSensor>();
         protected List<FanSensor> fanSensors = new List<FanSensor>();
@@ -31,10 +32,17 @@ namespace FanControl.ThermaltakeRiingPlus
             this.HidDevice = hidDevice;
             this.Index = index;
 
-            // Initialize
+            this.InitController();
             this.DetectFans();
         }
 
+        protected void InitController()
+        {
+            // Initialize the controller
+            this.HidDevice.Write(new byte[] { 0, this.byteInit, this.byteGet });
+        }
+
+        public virtual string GetName() => Name;
         protected void DetectFans()
         {
             // Connect to each port and check if we can get an RPM
@@ -65,13 +73,11 @@ namespace FanControl.ThermaltakeRiingPlus
 
         protected string GetFanName(int portNumber)
         {
-            return $"{this.Name} Fan {portNumber} on Controller {this.Index}";
+            return $"Fan {portNumber} on {this.GetName()} Controller {this.Index}";
         }
 
         public int GetFanRPM(int portNumber)
         {
-            Log.WriteToLog($"Try to set fan speed to 100% for {this.HidDevice.Device.ProductID}");
-            // Set to 100%
             try
             {
                 // Send 'get port info' request
@@ -79,7 +85,6 @@ namespace FanControl.ThermaltakeRiingPlus
                 // Read the output
                 byte[] portData = new byte[10];
 
-                Log.WriteToLog($"We received the following data {portData[0]} {portData[1]} {portData[2]} {portData[3]} {portData[4]} {portData[5]} {portData[6]} {portData[7]} {portData[8]}");
                 this.HidDevice.Read(portData);
                 // If we have an RPM of more than 255, we assume it's a fan
                 int RPM = (portData[7] << 8) + portData[6];

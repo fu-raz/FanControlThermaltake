@@ -9,11 +9,11 @@ namespace FanControl.ThermaltakeRiingPlus.FanControllers
 {
     public class RiingQuad : TTFanController, TTFanControllerInterface
     {
-        public new string Name => "Riing Quad";
-        public new int PortCount = 5;
+        public override string Name => "Riing Quad";
+        public override int PortCount => 5;
 
-        public new int ProductIdStart => 0x2260;
-        public new int ProductIdEnd => 0x2270;
+        public override int ProductIdStart => 0x2260;
+        public override int ProductIdEnd => 0x2270;
 
     }
 }
