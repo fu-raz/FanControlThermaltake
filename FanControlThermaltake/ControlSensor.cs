@@ -1,6 +1,6 @@
 ﻿using FanControl.Plugins;
 
-namespace FanControl.ThermaltakeRiingPlus
+namespace FanControl.Thermaltake
 {
     public class ControlSensor : IPluginControlSensor
     {
@@ -22,7 +22,7 @@ namespace FanControl.ThermaltakeRiingPlus
 
         public void Reset()
         {
-            this.ttFanController.SetFanPower(this.portNumber, 50);
+            this.ttFanController.SetFanPower(this.portNumber, 25);
         }
 
         public void Set(float val)

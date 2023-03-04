@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace FanControl.ThermaltakeRiingPlus
+namespace FanControl.Thermaltake
 {
     public class TTFanController : TTFanControllerInterface
     {
@@ -19,18 +19,26 @@ namespace FanControl.ThermaltakeRiingPlus
         public virtual byte byteSetSpeed => 0x01;
         public virtual byte byteInit => 0xfe;
 
+        protected int productId = 0;
+
+        protected Dictionary<int, byte[]> lastData = new Dictionary<int, byte[]>();
+        protected Dictionary<int, DateTime> lastUpdateTimes = new Dictionary<int, DateTime>();
+
         protected List<ControlSensor> controlSensors = new List<ControlSensor>();
         protected List<FanSensor> fanSensors = new List<FanSensor>();
-
+        
+        protected virtual TimeSpan throttleMS => TimeSpan.FromMilliseconds(50);
+        
         public TTFanController()
         {
            
         }
 
-        public void init(HidSharp.HidStream hidDevice, int index)
+        public void init(HidSharp.HidStream hidDevice, int index, int productId)
         {
             this.HidDevice = hidDevice;
             this.Index = index;
+            this.productId = productId;
 
             this.InitController();
             this.DetectFans();
@@ -38,80 +46,156 @@ namespace FanControl.ThermaltakeRiingPlus
 
         protected void InitController()
         {
+            this.lastData.Clear();
             // Initialize the controller
             this.HidDevice.Write(new byte[] { 0, this.byteInit, this.byteGet });
         }
 
-        public virtual string GetName() => Name;
         protected void DetectFans()
         {
             // Connect to each port and check if we can get an RPM
             for (int portNumber = 1; portNumber <= this.PortCount; portNumber++)
             {
-                Log.WriteToLog($"Trying to detect Fan on port {portNumber}");
                 int RPM = this.GetFanRPM(portNumber);
 
                 if (RPM > 0)
                 {
-                    Log.WriteToLog($"Found RPM of {RPM}");
-                    ControlSensor controlSensor = new ControlSensor(this.GetFanId(portNumber), this.GetFanName(portNumber), portNumber, this);
+                    string id = this.GetFanId(portNumber);
+                    string name = this.GetFanName(portNumber);
+
+                    Log.WriteToLog($"Creating control sensor {id}: {name} for port {portNumber}");
+                    ControlSensor controlSensor = new ControlSensor(id, name, portNumber, this);
                     this.controlSensors.Add(controlSensor);
 
-                    FanSensor fanSensor = new FanSensor(this.GetFanId(portNumber), this.GetFanName(portNumber), portNumber, this);
+                    Log.WriteToLog($"Creating fan sensor {id}: {name} for port {portNumber}");
+                    FanSensor fanSensor = new FanSensor(id, name, portNumber, this);
                     this.fanSensors.Add(fanSensor);
-                } else
-                {
-                    Log.WriteToLog("NO RPM could be detected");
+
+                    Log.WriteToLog("---");
                 }
             }
         }
 
         protected string GetFanId(int portNumber)
         {
-            return $"TT.{this.Index}.{portNumber}";
+            return $"{this.productId}/{portNumber}";
         }
 
         protected string GetFanName(int portNumber)
         {
-            return $"Fan {portNumber} on {this.GetName()} Controller {this.Index}";
+            string controllerSuffix = this.Index > 0 ? " " + (this.Index + 1).ToString() : "";
+            return $"Fan {portNumber} on TT {this.Name} Controller{controllerSuffix}";
+        }
+
+        protected byte[] getPortData(int portNumber)
+        {
+            DateTime now = DateTime.Now;
+            Console.WriteLine("--------------------");
+            byte[] portData = new byte[10];
+
+            // If there haven't been updates, we need to update
+            bool forceUpdate = !this.lastUpdateTimes.ContainsKey(portNumber);
+
+            if (forceUpdate || now - this.lastUpdateTimes[portNumber] >= this.throttleMS)
+            {
+                try
+                {
+                    this.lastUpdateTimes[portNumber] = now;
+                    // Send 'get port info' request
+
+                    Console.WriteLine($"Sending the read {this.byteGet}, {this.byteGetSpeed}, {portNumber} request for port {portNumber} to HID device");
+                    this.HidDevice.Write(new byte[] { 0, this.byteGet, this.byteGetSpeed, (byte)portNumber });
+
+                    int port = 0;
+                    int get = 0;
+
+                    while(get != this.byteGet && port != portNumber)
+                    {
+                        // Read again
+                        int bytesRead = this.HidDevice.Read(portData);
+                        port = (int)portData[3];
+                        get = (int)portData[1];
+                        Console.WriteLine($"Received {bytesRead} bytes from HID Device: \n0 => {portData[0]}\n1 => {portData[1]}\n2 => {portData[2]}\n3 => {portData[3]}\n4 => {portData[4]}\n5 => {portData[5]}\n6 => {portData[6]}\n7 => {portData[7]}");
+                    }
+                    this.HidDevice.Flush();
+
+                    // Hack to make sure the data is valid check for byteGet and Port number
+                    // [0, GET, GETSPEED, PORT, UNKNOWN, SPEED, RPM_L, RPM_H]
+                    if (forceUpdate || port == portNumber && get == this.byteGet)
+                    {
+                        // Store the data
+                        this.lastData[portNumber] = portData;
+                    }
+                } catch
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Failed to get new data");
+                    Console.ResetColor();
+                    Console.WriteLine("--------------------");
+                    return portData;
+                }
+
+                byte[] byteData = this.lastData[portNumber];
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"We are returning this data: \n0 => {byteData[0]}\n1 => {byteData[1]}\n2 => {byteData[2]}\n3 => {byteData[3]}\n4 => {byteData[4]}\n5 => {byteData[5]}\n6 => {byteData[6]}\n7 => {byteData[7]}");
+                Console.ResetColor();
+            } else
+            {
+                Console.WriteLine($"Returning cached data for port {portNumber}");
+            }
+
+            Console.WriteLine("--------------------");
+            
+            return this.lastData[portNumber];
         }
 
         public int GetFanRPM(int portNumber)
         {
             try
             {
-                // Send 'get port info' request
-                this.HidDevice.Write(new byte[] { 0, this.byteGet, this.byteGetSpeed, (byte)portNumber });
-                // Read the output
-                byte[] portData = new byte[10];
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.WriteLine($"Getting data for GetFanRPM port {portNumber}");
+                Console.ResetColor();
 
-                this.HidDevice.Read(portData);
-                // If we have an RPM of more than 255, we assume it's a fan
+                byte[] portData = this.getPortData(portNumber);
                 int RPM = (portData[7] << 8) + portData[6];
 
-                return (RPM > 0) ? RPM : 0;
-            } catch(Exception ex)
+                RPM = (RPM > 0) ? RPM : 0;
+
+                // Added this for throttling of HID device
+                return RPM;
+            } catch
             {
-                Log.WriteToLog(ex.ToString());
+                Log.WriteToLog("RPM timeout");
                 return 0;
             }
         }
 
         public int GetFanPower(int portNumber)
         {
-            // Send 'get port info' request
-            this.HidDevice.Write(new byte[] { 0x00, this.byteGet, this.byteGetSpeed, (byte)portNumber });
-            // Read the output
-            byte[] portData = new byte[10];
-            this.HidDevice.Read(portData);
-            // If we have an RPM of more than 255, we assume it's a fan
-            int power = portData[5];
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.WriteLine($"Getting data for GetFanPower port {portNumber}");
+            Console.ResetColor();
 
-            return (power > 0) ? power : 0;
+            try
+            {
+                byte[] portData = this.getPortData(portNumber);
+
+                int power = portData[5];
+                power = (power > 0) ? power : 0;
+
+                return power;
+            }
+            catch
+            {
+                return 0;
+            }
+
         }
 
         public void SetFanPower(int portNumber, float value)
         {
+            Log.WriteToLog($"Setting fan {portNumber} to {value}%");
             int percentage = (int)Math.Round(value);
             this.HidDevice.Write(new byte[] { 0, this.byteSet, this.byteGetSpeed, (byte)portNumber, this.byteSetSpeed, (byte)percentage });
         }

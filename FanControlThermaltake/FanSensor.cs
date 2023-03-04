@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FanControl.Plugins;
 
-namespace FanControl.ThermaltakeRiingPlus
+namespace FanControl.Thermaltake
 {
     public class FanSensor : IPluginSensor
     {
@@ -13,7 +13,7 @@ namespace FanControl.ThermaltakeRiingPlus
         public string Name { get; }
         public float? Value { get; set; }
 
-        protected int portNumber;
+        public int portNumber;
         protected TTFanControllerInterface ttFanController;
 
         public FanSensor(string id, string name, int portNumber, TTFanControllerInterface ttFanController)

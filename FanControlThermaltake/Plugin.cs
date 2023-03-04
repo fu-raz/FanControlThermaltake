@@ -1,7 +1,7 @@
 ﻿using FanControl.Plugins;
 using System.Collections.Generic;
 
-namespace FanControl.ThermaltakeRiingPlus
+namespace FanControl.Thermaltake
 {
     public class Plugin : IPlugin2
     {

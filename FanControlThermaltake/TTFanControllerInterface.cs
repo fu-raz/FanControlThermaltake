@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FanControl.ThermaltakeRiingPlus
+namespace FanControl.Thermaltake
 {
     public interface TTFanControllerInterface
     {
@@ -19,9 +19,7 @@ namespace FanControl.ThermaltakeRiingPlus
         byte byteSetSpeed { get; }
         byte byteInit { get; }
 
-        void init(HidSharp.HidStream hidDevice, int index);
-
-        string GetName();
+        void init(HidSharp.HidStream hidDevice, int index, int productId);
         int GetFanRPM(int portNumber);
         int GetFanPower(int portNumber);
         void SetFanPower(int portNumber, float value);

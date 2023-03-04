@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32407.343
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FanControl.ThermaltakeRiingPlus", "FanControlThermaltake\FanControl.ThermaltakeRiingPlus.csproj", "{EEDDA466-17A6-47EC-9D14-FA204D29D0D3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FanControl.Thermaltake", "FanControlThermaltake\FanControl.Thermaltake.csproj", "{EEDDA466-17A6-47EC-9D14-FA204D29D0D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThermaltakeRiingPlusTest", "ThermaltakeRiingPlusTest\ThermaltakeRiingPlusTest.csproj", "{94979930-644E-4FE6-B644-21AA5ECCE591}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThermaltakeRiingPlusTest", "ThermaltakeRiingPlusTest\ThermaltakeRiingPlusTest.csproj", "{94979930-644E-4FE6-B644-21AA5ECCE591}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

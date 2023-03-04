@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace FanControl.ThermaltakeRiingPlus
+namespace FanControl.Thermaltake
 {
     public class DevicesController
     {
@@ -29,22 +29,12 @@ namespace FanControl.ThermaltakeRiingPlus
                         if (null != fanControllerMatch)
                         {
                             
-                            Log.WriteToLog($"We found a TT device: {fanControllerMatch.GetName()}");
+                            Log.WriteToLog($"We found a TT device: {fanControllerMatch.Name}");
 
                             if (hidDevice.TryOpen(out HidSharp.HidStream hidStream))
                             {
-                                Log.WriteToLog("We opened the HID Device");
                                 int controllerIndex = this.Devices.Count;
-
-                                if (hidStream.CanWrite)
-                                {
-                                    Log.WriteToLog("HID device is writeable");
-                                } else
-                                {
-                                    Log.WriteToLog("HID device is not writable");
-                                }
-
-                                fanControllerMatch.init(hidStream, controllerIndex);
+                                fanControllerMatch.init(hidStream, controllerIndex, hidDevice.ProductID);
 
                                 Log.WriteToLog("Adding HID Device to Devices");
                                 this.Devices.Add(fanControllerMatch);
@@ -64,7 +54,7 @@ namespace FanControl.ThermaltakeRiingPlus
 
         private TTFanControllerInterface findController(int hidDeviceProductId)
         {
-            string targetNamespace = "FanControl.ThermaltakeRiingPlus.FanControllers";
+            string targetNamespace = "FanControl.Thermaltake.FanControllers";
             // Get all types in the current assembly
             var matchingTypes = Assembly.GetExecutingAssembly()
                                     .GetTypes()

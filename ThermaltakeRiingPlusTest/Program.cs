@@ -1,6 +1,9 @@
 ﻿
+using FanControl.Thermaltake;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace ThermaltakeRiingPlusTest
 {
@@ -8,44 +11,58 @@ namespace ThermaltakeRiingPlusTest
     {
         static void Main(string[] args)
         {
-            int VendorId = 0x264a;
-            int ProductId = 0x2260;
-            int MaxConnectedDevices = 5;
+            int vendorId = 0x264a;
 
-            int TTDevices = 0;
-            int SupportedDevices = 0;
-            int UnsupportedDevices = 0;
-
-            // Get devices from HID
             IEnumerable<HidSharp.HidDevice> deviceList = HidSharp.DeviceList.Local.GetHidDevices();
             //HidDeviceList = HidDevices.Enumerate(this.VendorId);
             foreach (HidSharp.HidDevice hidDevice in deviceList)
             {
-                if (hidDevice.VendorID == VendorId)
+                if (hidDevice.VendorID == vendorId)
                 {
-                    Console.WriteLine($"Found Thermaltake device with Vendor ID {hidDevice.VendorID} and Product ID {hidDevice.ProductID}");
-                    TTDevices++;
+                    int productId = hidDevice.ProductID;
 
-                    if (hidDevice.ProductID >= ProductId &&
-                    hidDevice.ProductID <= ProductId + MaxConnectedDevices)
+                    string targetNamespace = "FanControl.Thermaltake.FanControllers";
+
+                    var assembly = Assembly.GetAssembly(typeof(FanControl.Thermaltake.FanControllers.Riing));
+                    var matchingTypes = assembly.GetTypes().Where(t => t.Namespace == targetNamespace);
+
+                    bool found = false;
+
+                    foreach (var match in matchingTypes)
                     {
-                        SupportedDevices++;
+                        TTFanControllerInterface ttFanController = Activator.CreateInstance(match) as TTFanControllerInterface;
+                        if (productId >= ttFanController.ProductIdStart && productId <= ttFanController.ProductIdEnd)
+                        {
+                            found = true;
+                            if (hidDevice.TryOpen(out HidSharp.HidStream hidStream))
+                            {
+                                ttFanController.init(hidStream, 1, productId);
+                                Console.WriteLine("---------------------");
+                                Console.ForegroundColor = ConsoleColor.Green;
+                                Console.WriteLine($"We found a controller {ttFanController.Name}");
+                                Console.ResetColor();
+
+                                List<ControlSensor> controlSensors = ttFanController.GetControlSensors();
+                                List<FanSensor> fanSensors = ttFanController.GetFanSensors();
+
+                                Console.WriteLine($"We detected {controlSensors.Count} control sensors and {fanSensors.Count} fan sensors");
+                                foreach (var sensor in fanSensors)
+                                {
+                                    sensor.Update();
+                                    Console.WriteLine($"Fan {sensor.portNumber} is running at {sensor.Value} RPM");
+                                }
+                            }
+
+                            break;
+                        }
                     }
-                    else
+
+                    if (!found)
                     {
-                        Console.WriteLine($"We found an unsupported TT device with product ID {hidDevice.ProductID}");
-                        UnsupportedDevices++;
+                        Console.WriteLine($"We found a TT controller, but we don't yet support this one. Please raise an issue here https://github.com/fu-raz/FanControlThermaltake/issues with the following product id 0x{productId:X}");
                     }
                 }
             }
-
-            Console.WriteLine($"We found {TTDevices} Thermaltake devices, {SupportedDevices} supported and {UnsupportedDevices} unsupported");
-            if (UnsupportedDevices > 0)
-            {
-                Console.WriteLine($"Please raise an issue here with the unsupported product ID's: https://github.com/fu-raz/FanControlThermaltake/issues");
-            }
-            Console.WriteLine("Press any key to exit...");
-            Console.ReadKey();
         }
 
     }

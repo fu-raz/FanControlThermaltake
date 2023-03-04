@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FanControl.ThermaltakeRiingPlus.FanControllers
+namespace FanControl.Thermaltake.FanControllers
 {
     public class RiingPlus : TTFanController, TTFanControllerInterface
     {

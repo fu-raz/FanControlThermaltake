@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FanControlThermaltake\FanControl.ThermaltakeRiingPlus.csproj" />
+    <ProjectReference Include="..\FanControlThermaltake\FanControl.Thermaltake.csproj" />
   </ItemGroup>
 
 </Project>
