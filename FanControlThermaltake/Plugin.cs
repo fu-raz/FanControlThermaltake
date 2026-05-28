@@ -1,12 +1,15 @@
-﻿using FanControl.Plugins;
+using FanControl.Plugins;
+using System;
 using System.Collections.Generic;
 
 namespace FanControl.Thermaltake
 {
-    public class Plugin : IPlugin2
+    public class Plugin : IPlugin3
     {
         private DevicesController DevicesController = new DevicesController();
         public string Name => "Thermaltake";
+
+        public event Action RefreshRequested;
 
         public void Close()
         {
@@ -28,7 +31,7 @@ namespace FanControl.Thermaltake
             List<FanSensor> fanSensors = new List<FanSensor>();
 
             List<TTFanControllerInterface> fanControllers = this.DevicesController.GetFanControllers();
-            
+
             foreach (TTFanControllerInterface fanController in fanControllers)
             {
                 List<ControlSensor> cs = fanController.GetControlSensors();
@@ -54,7 +57,18 @@ namespace FanControl.Thermaltake
 
         public void Update()
         {
-
+            foreach (TTFanControllerInterface fanController in this.DevicesController.GetFanControllers())
+            {
+                try
+                {
+                    fanController.PollAllPorts();
+                }
+                catch (Exception ex)
+                {
+                    Log.WriteToLog($"Update failed for {fanController.Name}: {ex.Message}");
+                    RefreshRequested?.Invoke();
+                }
+            }
         }
     }
 }
