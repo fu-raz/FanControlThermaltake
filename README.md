@@ -1,6 +1,8 @@
 # FanControl Thermaltake Plugin
 This is a plugin that lets [Fan Control](https://github.com/Rem0o/FanControl.Releases) connect to a Thermaltake Fan Controller. Right now this is a proof-of-concept thing, but I've tried to add all the available TT controllers.
 
+Thanks to @mikedmor now fixed and updated to the latest version of FanControl Plugin DLL.
+
 ![tt-controller](https://user-images.githubusercontent.com/5355154/179553404-eb8102e8-6ced-4eee-aae5-79912550e278.png)
 
 *Known Issues:*
