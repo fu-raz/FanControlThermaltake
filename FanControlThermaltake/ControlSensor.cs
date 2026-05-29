@@ -1,12 +1,13 @@
-﻿using FanControl.Plugins;
+using FanControl.Plugins;
 
 namespace FanControl.Thermaltake
 {
-    public class ControlSensor : IPluginControlSensor
+    public class ControlSensor : IPluginControlSensor2
     {
         public string Id { get; }
         public string Name { get; }
         public float? Value { get; set; }
+        public string PairedFanSensorId => this.Id;
 
         protected int portNumber;
         protected TTFanControllerInterface ttFanController;
@@ -28,6 +29,7 @@ namespace FanControl.Thermaltake
         public void Set(float val)
         {
             this.ttFanController.SetFanPower(this.portNumber, val);
+            this.Value = val;
         }
 
         public void Update()

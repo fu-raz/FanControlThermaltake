@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace FanControl.Thermaltake
 {
@@ -20,6 +16,7 @@ namespace FanControl.Thermaltake
         byte byteInit { get; }
 
         void init(HidSharp.HidStream hidDevice, int index, int productId);
+        void PollAllPorts();
         int GetFanRPM(int portNumber);
         int GetFanPower(int portNumber);
         void SetFanPower(int portNumber, float value);
